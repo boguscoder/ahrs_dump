@@ -5,7 +5,7 @@ use std::io::{self};
 
 fn main() {
     // Initialize filter with default values
-    let mut ahrs = Madgwick::default();
+    let mut ahrs = Madgwick::new(1.0 / 1000.0 as f64, 0.002);
 
     let stdin = io::stdin();
     for line in stdin.lines() {
@@ -25,14 +25,15 @@ fn main() {
         let magnetometer = Vector3::new(values[6], values[7], values[8]);
 
         let quat = ahrs
-            .update(
-                &(gyroscope * (f64::consts::PI / 180.0)),
-                &accelerometer,
-                &magnetometer,
-            )
+            .update(&gyroscope, &accelerometer, &magnetometer)
             .unwrap();
         let (roll, pitch, yaw) = quat.euler_angles();
 
-        println!("pitch={}, roll={}, yaw={}", pitch, roll, yaw);
+        println!(
+            "pitch={:.6}, roll={:.6}, yaw={:.6}",
+            pitch.to_degrees(),
+            roll.to_degrees(),
+            yaw.to_degrees()
+        );
     }
 }
